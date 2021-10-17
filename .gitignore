@@ -1,0 +1,5 @@
+/target
+docs/_build
+/.direnv
+result
+.secrets
