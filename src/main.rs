@@ -47,7 +47,11 @@ extern crate features;
 
 mod commands {
     pub mod jira;
+    pub mod simulation {
+        pub mod run;
+    }
 }
+
 mod command;
 mod configs {
     pub mod jira;
@@ -67,7 +71,8 @@ mod lib {
 
 features! {
     mod feature_flags {
-        const TimeInStatus = 0b0000_0010
+        const TimeInStatus = 0b0000_0010,
+        const SimulationRun = 0b0000_0100
     }
 }
 
@@ -99,6 +104,12 @@ pub enum Error {
     FailedToRunJiraTimeInStatus {
         /// The underlying source of the problem in running the command
         source: commands::jira::Error,
+    },
+    /// Produced when the simulation run command fails
+    #[snafu(display("Failed to run simulation run command: {}", source))]
+    FailedSimulationRun {
+        /// The underlying source of the problem in running the command
+        source: commands::simulation::run::Error,
     },
 }
 
@@ -135,9 +146,25 @@ struct Jira {
     cmd: JiraCommand,
 }
 
+/// Runs the simulation on the data provided a structure. That structure may come from
+/// the provided `input_file` or from `stdin`
+#[derive(Debug, StructOpt)]
+struct Run {
+    /// The input file containing the simulation. This maybe omitted and provided in stdin
+    #[structopt(short, long, parse(from_os_str))]
+    input_file: Option<PathBuf>,
+}
+
+/// Provides the various target commands that run on the simulation
+#[derive(Debug, StructOpt)]
+enum Simulation {
+    Run(Run),
+}
+
 #[derive(Debug, StructOpt)]
 enum Command {
     Jira(Jira),
+    Simulation(Simulation),
 }
 
 #[derive(Debug, StructOpt)]
@@ -171,12 +198,18 @@ fn enable_feature(feature: &str) -> Result<(), Error> {
     match feature {
         "ALL" => {
             info!("Enabled the all feature flags");
-            feature_flags::enable(feature_flags::TimeInStatus);
+            enable_feature("jira-time-in-status")?;
+            enable_feature("simulation-run")?;
             Ok(())
         }
         "jira-time-in-status" => {
             info!("Enabled the `jira-time-in-status` flag");
             feature_flags::enable(feature_flags::TimeInStatus);
+            Ok(())
+        }
+        "simulation-run" => {
+            info!("Enabled the `simulation-run` flag");
+            feature_flags::enable(feature_flags::SimulationRun);
             Ok(())
         }
         _ => {
@@ -215,6 +248,14 @@ async fn do_jira_reports(config_path: &Option<PathBuf>, cmd: &JiraCommand) -> Re
     }
 }
 
+async fn do_simulation(sim: &Simulation) -> Result<(), Error> {
+    match sim {
+        Simulation::Run(Run { input_file }) => commands::simulation::run::do_command(input_file)
+            .await
+            .context(FailedSimulationRun {}),
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Error> {
     let opt = Opt::from_args();
@@ -234,6 +275,7 @@ async fn main() -> Result<(), Error> {
 
     match opt.command {
         Command::Jira(Jira { config_path, cmd }) => do_jira_reports(&config_path, &cmd).await?,
+        Command::Simulation(sim) => do_simulation(&sim).await?,
     }
     Ok(())
 }
