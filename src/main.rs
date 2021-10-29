@@ -67,6 +67,12 @@ mod lib {
         pub mod times_in_flight;
     }
     pub mod rest;
+    pub mod simulation {
+        pub mod external;
+        pub mod index;
+        pub mod internal;
+        pub mod rand_topo;
+    }
 }
 
 features! {

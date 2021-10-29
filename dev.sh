@@ -51,7 +51,7 @@ function clean {
 
 function lint-rust {
   write "LINT-RUST: running clippy on all rust code"
-  cargo clippy
+  cargo clippy -- -D warnings
 }
 
 function build-rust {
@@ -156,8 +156,8 @@ function format() {
 
 function validate() {
   write "VALIDATE: run all available validations"
-  build
   lint
+  build
   test
   check-format
 }

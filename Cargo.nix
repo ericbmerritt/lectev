@@ -124,6 +124,14 @@ rec {
         }];
         features = { "derive_serde_style" = [ "serde" ]; };
       };
+      "assoc" = rec {
+        crateName = "assoc";
+        version = "0.1.2";
+        edition = "2018";
+        sha256 = "1a2krpl2syr0m38cy5vmsdp48yk9x5vhm5x3daq0p1dnmnwhn81p";
+        authors = [ "<mingyli34@gmail.com>" ];
+
+      };
       "atty" = rec {
         crateName = "atty";
         version = "0.2.14";
@@ -1989,6 +1997,10 @@ rec {
         authors = [ "Eric B. Merritt <eric@merritt.tech>" ];
         dependencies = [
           {
+            name = "assoc";
+            packageId = "assoc";
+          }
+          {
             name = "backoff";
             packageId = "backoff";
             features = [ "tokio" ];
@@ -2036,9 +2048,22 @@ rec {
             packageId = "futures 0.3.17";
           }
           {
+            name = "percentage-rs";
+            packageId = "percentage-rs";
+            features = [ "serde_support" ];
+          }
+          {
+            name = "rand";
+            packageId = "rand";
+          }
+          {
             name = "reqwest";
             packageId = "reqwest";
             features = [ "json" ];
+          }
+          {
+            name = "retain_mut";
+            packageId = "retain_mut";
           }
           {
             name = "serde";
@@ -2594,7 +2619,7 @@ rec {
           packageId = "autocfg";
         }];
         features = { "default" = [ "std" ]; };
-        resolvedDefaultFeatures = [ "std" ];
+        resolvedDefaultFeatures = [ "default" "std" ];
       };
       "num_cpus" = rec {
         crateName = "num_cpus";
@@ -2876,6 +2901,27 @@ rec {
         libPath = "lib.rs";
         authors = [ "The rust-url developers" ];
 
+      };
+      "percentage-rs" = rec {
+        crateName = "percentage-rs";
+        version = "0.1.6";
+        edition = "2018";
+        sha256 = "0a66v84i5nqag341dpdprq1g5rq4nwxhw6s9n8wz67qxvmdvhrkb";
+        authors = [ "NemuiSen <nekonya.sen@gmail.com>" ];
+        dependencies = [
+          {
+            name = "num-traits";
+            packageId = "num-traits";
+          }
+          {
+            name = "serde";
+            packageId = "serde";
+            optional = true;
+            features = [ "derive" ];
+          }
+        ];
+        features = { "serde_support" = [ "serde" ]; };
+        resolvedDefaultFeatures = [ "serde" "serde_support" ];
       };
       "pest" = rec {
         crateName = "pest";
@@ -3562,6 +3608,14 @@ rec {
           "serde_json"
           "tokio-native-tls"
         ];
+      };
+      "retain_mut" = rec {
+        crateName = "retain_mut";
+        version = "0.1.4";
+        edition = "2015";
+        sha256 = "1jd8hc0vrhcj3xn114k0nlbjqbrhl7m1snbk270rcjq33lj9d0j4";
+        authors = [ "Xidorn Quan <me@upsuper.org>" ];
+        features = { };
       };
       "rustc_version 0.2.3" = rec {
         crateName = "rustc_version";

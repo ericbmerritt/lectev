@@ -31,3 +31,7 @@ base64 = "0.13"
 bdays = "0.1"
 csv-async = {version = "1.1", features = ["tokio"]}
 uom = {version = "0.31", features = ["use_serde"]}
+assoc = "0.1"
+rand = "0.8"
+retain_mut = "0.1"
+percentage-rs = {version = "0.1.6", features = [ "serde_support" ]}

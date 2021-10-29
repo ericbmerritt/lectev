@@ -2,7 +2,7 @@ Lectev
 ======
 
 Lectev is a tool for interacting with Jira. It contains several things that the,
-as a manager, find useful. 
+as a manager, find useful.
 
 Features
 ---------
@@ -28,4 +28,4 @@ works.
 
 .. _Nix: https://nixos.org
 .. _Direnv: https://direnv.net
-.. _Nix Direnv: https://github.com/nix-community/nix-direnv 
+.. _Nix Direnv: https://github.com/nix-community/nix-direnv
