@@ -42,7 +42,7 @@ pub enum Error {
 pub struct WorkerId(String);
 
 impl WorkerId {
-    fn new(value: String) -> Result<Self, Error> {
+    pub fn new(value: String) -> Result<Self, Error> {
         if value.is_empty() {
             Err(Error::InstantiateWorkerId { id: value })
         } else {
@@ -61,11 +61,11 @@ impl<'de> Deserialize<'de> for WorkerId {
     }
 }
 
-#[derive(Display, Debug, Serialize, Hash, Eq, PartialEq, PartialOrd)]
+#[derive(Display, Debug, Clone, Serialize, Hash, Eq, PartialEq, PartialOrd)]
 pub struct WorkItemId(String);
 
 impl WorkItemId {
-    fn new(value: String) -> Result<Self, Error> {
+    pub fn new(value: String) -> Result<Self, Error> {
         if value.is_empty() {
             Err(Error::CreateWorkItemId { id: value })
         } else {
@@ -84,11 +84,11 @@ impl<'de> Deserialize<'de> for WorkItemId {
     }
 }
 
-#[derive(Display, Debug, Serialize, Hash, PartialEq, Eq, PartialOrd)]
+#[derive(Display, Debug, Clone, Serialize, Hash, PartialEq, Eq, PartialOrd)]
 pub struct WorkGroupId(String);
 
 impl WorkGroupId {
-    fn new(value: String) -> Result<Self, Error> {
+    pub fn new(value: String) -> Result<Self, Error> {
         if value.is_empty() {
             Err(Error::CreateWorkGroupId { id: value })
         } else {
@@ -111,7 +111,7 @@ impl<'de> Deserialize<'de> for WorkGroupId {
 pub struct Skill(String);
 
 impl Skill {
-    fn new(value: String) -> Result<Self, Error> {
+    pub fn new(value: String) -> Result<Self, Error> {
         if value.is_empty() {
             Err(Error::InstantiateSkill { id: value })
         } else {
@@ -133,18 +133,18 @@ impl<'de> Deserialize<'de> for Skill {
 #[derive(Display, Debug, Serialize, Deserialize)]
 #[display(fmt = "Pto {{date: {}, percentage: {}}}", date, percentage)]
 pub struct Pto {
-    pub date: NaiveDateTime,
+    pub date: chrono::NaiveDate,
     pub percentage: percentage_rs::Percentage,
 }
 
 /// Represents an individual doing work in the system. Each individual has a set of skills. Those
 /// skills map to the skills required to do a unit of work.
 #[derive(Display, Debug, Serialize, Deserialize)]
-#[display(fmt = "Worker {{id: {}, skills: {:?}, pto: {}}}", id, skills, pto)]
+#[display(fmt = "Worker {{id: {}, skills: {:?}, pto: {:?}}}", id, skills, pto)]
 pub struct Worker {
     pub id: WorkerId,
     pub skills: HashSet<Skill>,
-    pub pto: Pto,
+    pub pto: Vec<Pto>,
 }
 
 #[derive(Display, Debug, Serialize, Deserialize)]
@@ -155,7 +155,7 @@ pub struct Estimate {
     pub p95: f32,
 }
 
-#[derive(Display, Debug, Serialize, Deserialize, Hash, PartialOrd, PartialEq)]
+#[derive(Display, Debug, Clone, Serialize, Deserialize, Hash, PartialOrd, PartialEq)]
 pub enum WorkItemOrGroupId {
     WorkItem(WorkItemId),
     WorkGroup(WorkGroupId),
@@ -163,23 +163,26 @@ pub enum WorkItemOrGroupId {
 
 #[derive(Display, Debug, Serialize, Deserialize)]
 #[display(
-    fmt = "WorkItem {{id: {}, estimates: {:?}, dependencies: {:?}, skills: {:?}}}",
+    fmt = "WorkItem {{id: {}, description: {}, estimates: {:?}, dependencies: {:?}, skills: {:?}}}",
     id,
+    description,
     estimates,
     dependencies,
     skills
 )]
 pub struct WorkItem {
     pub id: WorkItemId,
+    pub description: String,
     pub estimates: Vec<(WorkerId, Estimate)>,
     pub dependencies: Vec<WorkItemOrGroupId>,
     pub skills: HashSet<Skill>,
 }
 
 #[derive(Display, Debug, Serialize, Deserialize)]
-#[display(fmt = "WorkGroup {{id: {}, children: {:?}}}", id, children)]
+#[display(fmt = "WorkGroup {{id: {}, description: {}, children: {:?}}}", id, description, children)]
 pub struct WorkGroup {
     pub id: WorkGroupId,
+    pub description: String,
     pub children: Vec<Work>,
     pub dependencies: Vec<WorkItemOrGroupId>,
 }
@@ -199,11 +202,22 @@ pub struct Simulation {
 
 #[derive(Display, Debug, Serialize, Deserialize)]
 #[display(
-    fmt = "Projection {{item: {}, projected_completion_date: {}}}",
+    fmt = "CompletionDates {{item: {}, projected_completion_date: {}}}",
     item,
     projected_completion_date
 )]
-pub struct Projection {
+pub struct CompletionDates {
     pub item: WorkItemOrGroupId,
     pub projected_completion_date: NaiveDateTime,
+}
+
+#[derive(Display, Debug, Serialize, Deserialize)]
+#[display(
+    fmt = "Projection {{simulation: {}, completion_dates: {}}}",
+    simulation,
+    completion_dates
+)]
+pub struct Projection {
+    pub simulation: Simulation,
+    pub completion_dates: CompletionDates,
 }

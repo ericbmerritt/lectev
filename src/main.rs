@@ -49,6 +49,7 @@ mod commands {
     pub mod jira;
     pub mod simulation {
         pub mod run;
+        pub mod import_csv;
     }
 }
 
@@ -72,13 +73,15 @@ mod lib {
         pub mod index;
         pub mod internal;
         pub mod rand_topo;
+        pub mod convert_template;
     }
 }
 
 features! {
     mod feature_flags {
         const TimeInStatus = 0b0000_0010,
-        const SimulationRun = 0b0000_0100
+        const SimulationRun = 0b0000_0100,
+        const SimulationImport = 0b0000_1000
     }
 }
 
@@ -206,6 +209,7 @@ fn enable_feature(feature: &str) -> Result<(), Error> {
             info!("Enabled the all feature flags");
             enable_feature("jira-time-in-status")?;
             enable_feature("simulation-run")?;
+            enable_feature("simulation-import")?;
             Ok(())
         }
         "jira-time-in-status" => {
@@ -216,6 +220,11 @@ fn enable_feature(feature: &str) -> Result<(), Error> {
         "simulation-run" => {
             info!("Enabled the `simulation-run` flag");
             feature_flags::enable(feature_flags::SimulationRun);
+            Ok(())
+        }
+        "simulation-import" => {
+            info!("Enable the `simulation-import` flag");
+            feature_flags::enable(feature_flags::SimulationImport);
             Ok(())
         }
         _ => {
